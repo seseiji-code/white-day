@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy White Day 有花 ❤️</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --pink-light: #ffe0ec;
+      --pink-mid:   #ffb3cf;
+      --pink-deep:  #ff6fa8;
+      --rose:       #e8386d;
+      --cream:      #fff8f9;
+      --white:      #ffffff;
+      --text-dark:  #3a1a28;
+      --text-mid:   #7a3a54;
+      --shadow:     rgba(232, 56, 109, 0.18);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Serif JP', serif;
+      background: linear-gradient(135deg, #ffe4f0 0%, #fff0fa 40%, #fce4ff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* 背景ハート */
+    .bg-hearts { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .bg-hearts span { position: absolute; opacity: 0.08; animation: floatSlow linear infinite; }
+    @keyframes floatSlow {
+      0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+      10%  { opacity: 0.08; }
+      90%  { opacity: 0.08; }
+      100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* メインコンテナ */
+    #app {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 620px;
+      margin: 20px auto; padding: 0 16px;
+    }
+
+    /* カード */
+    .card {
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(16px);
+      border-radius: 28px;
+      padding: 40px 36px;
+      box-shadow: 0 8px 48px var(--shadow), 0 2px 12px rgba(255,100,160,0.10);
+      border: 1.5px solid rgba(255,179,207,0.4);
+    }
+    @media (max-width: 480px) { .card { padding: 28px 20px; } }
+
+    /* タイトル */
+    #screen-title { text-align: center; }
+    .title-deco { font-size: 2.4rem; letter-spacing: 4px; margin-bottom: 8px; display: block; }
+    .title-main {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 6vw, 2.6rem);
+      color: var(--rose); line-height: 1.3; margin-bottom: 8px;
+    }
+    .title-sub { color: var(--text-mid); font-size: 0.95rem; margin-bottom: 6px; line-height: 1.8; }
+    .title-from { font-size: 0.85rem; color: #b06080; margin-top: 4px; font-style: italic; }
+    .divider {
+      width: 60px; height: 2px;
+      background: linear-gradient(90deg, var(--pink-mid), var(--pink-deep));
+      border-radius: 2px; margin: 20px auto;
+    }
+
+    /* ボタン */
+    .btn {
+      display: inline-block; padding: 14px 44px; border: none; border-radius: 50px;
+      font-family: 'Noto Serif JP', serif; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: transform 0.18s, box-shadow 0.18s; letter-spacing: 1px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--pink-deep), var(--rose));
+      color: var(--white); box-shadow: 0 6px 24px rgba(232,56,109,0.35); margin-top: 28px;
+    }
+    .btn-primary:hover  { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(232,56,109,0.45); }
+    .btn-primary:active { transform: translateY(0); }
+
+    /* プログレスバー */
+    .progress-wrap { margin-bottom: 24px; }
+    .progress-label { font-size: 0.82rem; color: var(--text-mid); margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .progress-bar-bg { height: 8px; background: var(--pink-light); border-radius: 8px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--pink-mid), var(--rose)); border-radius: 8px; transition: width 0.5s ease; }
+
+    /* クイズ */
+    .question-num { font-size: 0.8rem; color: var(--pink-deep); font-weight: 700; letter-spacing: 2px; margin-bottom: 10px; }
+    .question-text { font-size: clamp(1rem, 4vw, 1.25rem); color: var(--text-dark); line-height: 1.7; margin-bottom: 28px; }
+    .choices { display: flex; flex-direction: column; gap: 12px; }
+    .choice-btn {
+      background: var(--cream); border: 2px solid var(--pink-light); border-radius: 16px;
+      padding: 14px 20px; text-align: left; cursor: pointer;
+      font-family: 'Noto Serif JP', serif; font-size: 0.97rem; color: var(--text-dark);
+      transition: all 0.2s; display: flex; align-items: center; gap: 12px;
+    }
+    .choice-btn:hover:not(:disabled) { border-color: var(--pink-deep); background: var(--pink-light); transform: translateX(4px); }
+    .choice-btn.correct { border-color: #3dbc6e; background: #e8fdf0; color: #1e7d40; animation: correctPulse 0.4s ease; }
+    .choice-btn.wrong   { border-color: #e05050; background: #fff0f0; color: #b03030; animation: wrongShake 0.4s ease; }
+    .choice-btn:disabled { cursor: not-allowed; }
+    .choice-label {
+      width: 28px; height: 28px; border-radius: 50%; background: var(--pink-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700; color: var(--pink-deep); flex-shrink: 0; transition: background 0.2s;
+    }
+    .choice-btn.correct .choice-label { background: #3dbc6e; color: #fff; }
+    .choice-btn.wrong   .choice-label { background: #e05050; color: #fff; }
+    @keyframes correctPulse { 0%{transform:scale(1)} 50%{transform:scale(1.03)} 100%{transform:scale(1)} }
+    @keyframes wrongShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+
+    /* フィードバック */
+    .feedback {
+      margin-top: 18px; padding: 12px 18px; border-radius: 12px; font-size: 0.92rem;
+      text-align: center; opacity: 0; transform: translateY(8px); transition: opacity 0.3s, transform 0.3s;
+    }
+    .feedback.show    { opacity: 1; transform: translateY(0); }
+    .feedback.correct { background: #e8fdf0; color: #1e7d40; }
+    .feedback.wrong   { background: #fff0f0; color: #b03030; }
+    .next-btn-wrap { text-align: center; margin-top: 22px; }
+
+    /* ハートエフェクト */
+    .heart-burst { position: fixed; pointer-events: none; z-index: 9999; font-size: 1.6rem; animation: heartFly 1.2s ease forwards; }
+    @keyframes heartFly {
+      0%   { opacity: 1; transform: translate(0,0) scale(0.8); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.4); }
+    }
+
+    /* スコア画面 */
+    .score-wrap { text-align: center; }
+    .score-big { font-family: 'Playfair Display', serif; font-size: 3.5rem; color: var(--rose); line-height: 1; }
+    .score-label { font-size: 0.9rem; color: var(--text-mid); margin-top: 6px; }
+
+    /* クリア演出オーバーレイ */
+    #overlay {
+      position: fixed; inset: 0; background: #0d0010; z-index: 1000;
+      display: none; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;
+    }
+    #overlay.active { display: flex; }
+
+    /* カウントダウン */
+    #countdown {
+      font-family: 'Playfair Display', serif; font-size: clamp(5rem, 20vw, 10rem);
+      color: #fff; opacity: 0; transform: scale(0.5);
+      transition: opacity 0.3s, transform 0.3s; position: absolute; z-index: 10;
+    }
+    #countdown.show { opacity: 1; transform: scale(1); }
+    #countdown.hide { opacity: 0; transform: scale(2); }
+
+    /* 花火 */
+    #fireworkCanvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+    /* クリアタイトル */
+    #clearTitle { position: absolute; z-index: 10; text-align: center; opacity: 0; transform: scale(0.8); transition: opacity 0.8s, transform 0.8s; }
+    #clearTitle.show { opacity: 1; transform: scale(1); }
+    #clearTitle h1 {
+      font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 7vw, 3.2rem); color: #fff;
+      text-shadow: 0 0 40px rgba(255,160,200,0.9), 0 0 80px rgba(255,100,160,0.6); line-height: 1.3;
+    }
+    #clearTitle p { font-size: 1rem; color: rgba(255,220,235,0.85); margin-top: 8px; }
+
+    /* スライドショー */
+    #slideshow {
+      position: absolute; inset: 0; z-index: 5;
+      display: flex; align-items: center; justify-content: center;
+      background: #0d0010; opacity: 0; transition: opacity 1s; overflow: hidden;
+    }
+    #slideshow.show { opacity: 1; }
+
+    #slideTrack {
+      position: relative; width: 100%; height: 100%; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* 写真（2枚重ね・画面の80%・全体表示） */
+    .slide-layer {
+      position: absolute;
+      width: 88vw; height: 88vh;
+      object-fit: contain;   /* ← coverからcontainに変更で全体表示 */
+      border-radius: 12px;
+      background: transparent;
+    }
+    #slideImgBack  { z-index: 1; }
+    #slideImgFront { z-index: 2; }
+
+    /* スライド切り替え：フェードトランジション */
+    .slide-layer {
+      transition: opacity 0.8s ease;
+    }
+    #slideImgFront.fade-out { opacity: 0; }
+    #slideImgFront.fade-in  { opacity: 1; }
+
+    /* カーテン幕（最初の1枚目の登場だけに使用） */
+    #curtain { position: absolute; inset: 0; z-index: 3; display: flex; pointer-events: none; }
+    .curtain-half {
+      flex: 1; height: 100%; background: #0d0010;
+      transform: scaleX(1); transition: transform 0.9s cubic-bezier(0.86, 0, 0.07, 1);
+      position: relative;
+    }
+    .curtain-half.left  { transform-origin: left center; }
+    .curtain-half.right { transform-origin: right center; }
+    .curtain-half.open  { transform: scaleX(0); }
+    .curtain-half.left::after {
+      content: ''; position: absolute; top: 0; bottom: 0; right: 0; width: 2px;
+      background: linear-gradient(180deg, transparent 0%, rgba(255,150,200,0.5) 25%, rgba(255,210,235,0.95) 50%, rgba(255,150,200,0.5) 75%, transparent 100%);
+    }
+    .curtain-half.right::before {
+      content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 2px;
+      background: linear-gradient(180deg, transparent 0%, rgba(255,150,200,0.5) 25%, rgba(255,210,235,0.95) 50%, rgba(255,150,200,0.5) 75%, transparent 100%);
+    }
+
+    /* キャプション */
+    #slideCaption {
+      position: absolute; bottom: 60px; left: 0; right: 0; z-index: 4;
+      text-align: center; color: rgba(255,220,235,0.85); font-size: 0.9rem;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+    }
+
+    /* 写真なしプレースホルダー */
+    .slide-placeholder {
+      width: 80vw; height: 80vh; border-radius: 16px;
+      background: linear-gradient(135deg, #2a0a1a, #1a0828);
+      border: 2px dashed rgba(255,150,200,0.3);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: rgba(255,200,220,0.7); font-size: 0.9rem; text-align: center; gap: 12px;
+      opacity: 0; transition: opacity 0.8s; z-index: 2;
+    }
+    .slide-placeholder.show { opacity: 1; }
+    .slide-placeholder span { font-size: 2.5rem; }
+
+    /* 最終メッセージ */
+    #finalMessage {
+      position: absolute; inset: 0; z-index: 20;
+      display: none; align-items: center; justify-content: center;
+      background: rgba(13,0,16,0.92); opacity: 0; transition: opacity 1.2s;
+    }
+    #finalMessage.show { opacity: 1; }
+    .message-card {
+      max-width: min(90vw, 460px); background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px); border: 1.5px solid rgba(255,150,200,0.25);
+      border-radius: 24px; padding: 36px 32px; text-align: center; color: #ffe8f2;
+    }
+    .message-card .msg-deco { font-size: 2rem; margin-bottom: 12px; }
+    .message-card p { font-size: 0.97rem; line-height: 2; margin-bottom: 20px; color: rgba(255,235,245,0.88); }
+    .message-card .msg-sign { font-size: 0.88rem; color: rgba(255,180,210,0.8); font-style: italic; }
+
+    /* 浮かぶハート */
+    .float-heart { position: absolute; pointer-events: none; font-size: 1.4rem; animation: floatUp linear forwards; z-index: 6; }
+    @keyframes floatUp { 0%{transform:translateY(0) scale(0.8);opacity:0.9} 100%{transform:translateY(-120vh) scale(1.2);opacity:0} }
+
+    /* 画面トランジション */
+    .screen { animation: fadeIn 0.5s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    /* BGMパネル */
+    #bgmPanel {
+      position: fixed; bottom: 20px; right: 20px; z-index: 2000;
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.18); backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,179,207,0.4); border-radius: 50px;
+      padding: 8px 14px; box-shadow: 0 4px 20px rgba(232,56,109,0.2);
+    }
+    #bgmToggle { background: none; border: none; font-size: 1.3rem; cursor: pointer; line-height: 1; transition: transform 0.2s; }
+    #bgmToggle:hover { transform: scale(1.2); }
+    #bgmToggle.muted { opacity: 0.4; }
+    #bgmSelect { background: transparent; border: none; font-family: 'Noto Serif JP', serif; font-size: 0.78rem; color: var(--text-dark); cursor: pointer; outline: none; max-width: 130px; }
+    #bgmSelect option { background: #fff5f8; color: var(--text-dark); }
+
+    .text-center { text-align: center; }
+    .mt-sm { margin-top: 10px; }
+    .mt-md { margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+<div class="bg-hearts" id="bgHearts"></div>
+<div id="app"></div>
+
+<!-- BGMパネル -->
+<div id="bgmPanel">
+  <button id="bgmToggle" onclick="toggleBGM()" title="BGM ON/OFF">🎵</button>
+  <!--
+    ★ BGM選択肢の編集方法
+    value に著作権フリーのMP3 URLを入れてください
+    ローカルファイルを使う場合は HTMLと同じフォルダに mp3 を置いて value="bgm.mp3" と書く
+  -->
+  <select id="bgmSelect" onchange="changeBGM(this.value)" title="BGMを選ぶ">
+    <option value="Hello,_world.mp3">love Pop</option>
+    <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3">🌟 Happy Pop</option>
+    <!-- <option value="https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3">🎀 Cute &amp; Bright</option>
+    <option value="https://cdn.pixabay.com/download/audio/2021/08/09/audio_9bcdb3e4f5.mp3">💕 Fun Party</option> -->
+    <!-- <option value="bgm.mp3">🎵 自分の曲</option> -->
+  </select>
+</div>
+
+<!-- クリア演出オーバーレイ -->
+<div id="overlay">
+  <canvas id="fireworkCanvas"></canvas>
+  <div id="countdown"></div>
+  <div id="clearTitle">
+    <h1>Happy White Day<br>有花 ❤️</h1>
+    <p>～ 誠治より ～</p>
+  </div>
+
+  <!-- スライドショー -->
+  <div id="slideshow">
+    <div id="slideTrack">
+      <img id="slideImgBack"  class="slide-layer" src="" alt="" />
+      <img id="slideImgFront" class="slide-layer" src="" alt="思い出写真" />
+      <div id="curtain">
+        <div class="curtain-half left"></div>
+        <div class="curtain-half right"></div>
+      </div>
+    </div>
+    <div class="slide-placeholder" id="slidePlaceholder" style="display:none;">
+      <span>📷</span>
+      <div>ここに思い出の写真が表示されます</div>
+      <div style="font-size:0.78rem;opacity:0.6;">photos 配列に画像ファイル名を追加してください</div>
+    </div>
+    <div id="slideCaption"></div>
+  </div>
+
+  <!-- 最終メッセージ -->
+  <div id="finalMessage">
+    <div class="message-card">
+      <div class="msg-deco">💌</div>
+      <p>
+        有花へ<br><br>
+        これまでたくさんの思い出を<br>
+        一緒に作ってくれてありがとう。<br>
+        どの瞬間も大切な宝物です。<br><br>
+        これからも一緒にたくさんの<br>
+        思い出を作ろう。
+      </p>
+      <div class="msg-sign">誠治より ❤️</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===========================================
+   ★ ここを自由に編集してください！
+=========================================== */
+
+/* --- クイズデータ ---
+   question : 問題文
+   choices  : 選択肢（4つ）
+   answer   : 正解インデックス（0始まり）。複数正解は配列で例: [0,1,2,3]
+   comment  : 正解後に表示するコメント
+*/
+const quizData = [
+  {
+    question: "2人で初めて作った料理はなーんだ？",
+    choices: ["ハンバーグ", "タコス", "スパゲッティ", "パンケーキ"],
+    answer: 0,
+    comment: "めちゃくちゃおいしくてご飯が進んだね！！"
+  },
+  {
+    question: "あっつぅ〜と発言した後にいうことは？",
+    choices: ["かっつぉ！", "暑いね。脱ぐ？", "パタパタ", "扇風機ポイッ"],
+    answer: 0,
+    comment: "謎の掛け声どんどん増やしていこね🍳"
+  },
+  {
+    question: "誠治が有花の好きなところは？",
+    choices: ["笑顔", "優しいところ", "アクティブなところ", "がんばり屋さん"],
+    answer: [0,1,2,3],
+    comment: "ぜーんぶ最高だぁ✨"
+  },
+  {
+    question: "誠治が有花にあげたバラの色は？",
+    choices: ["白", "黄", "黒", "紫"],
+    answer: 1,
+    comment: "めっちゃ喜んでくれた🌹"
+  },
+  {
+    question: "誠治と有花が付き合って今日で何日目？",
+    choices: ["372日", "389日", "398日", "401日"],
+    answer: 1,
+    comment: "もうこんなになったんだ！いつもありがと🐬"
+  },
+];
+/* --- 思い出写真スライドショー ---
+   HTMLと同じフォルダに画像を置いてファイル名を書いてください
+   例: "MG_1.JPG"  または外部URLも可
+   空配列のままでもプレースホルダーが表示されます
+*/
+const photos = [
+  "MG_1.JPG",
+  "MG_2.JPG",
+  "MG_3.JPG",
+  "MG_4.JPG",
+  "MG_5.jpg",
+  "MG_6.JPG",
+  "MG_7.JPG",
+  "MG_8.JPG",
+  "MG_9.JPG",
+  "MG_10.JPG",
+  "MG_11.JPG",
+  "MG_12.JPG",
+  "MG_13.JPG",
+  "MG_14.JPG",
+  "MG_15.JPG",
+  "MG_16.JPG",
+  "MG_17.JPG",
+  "MG_18.JPG",
+  "MG_19.JPG",
+  "MG_20.JPG",
+  "MG_21.jpg",
+];
+
+/* --- キャプション（写真と同じ順番・省略可） --- */
+const captions = [
+  // "初めてのデート 🐬",
+  // "記念日のディナー 🍽️",
+];
+
+/* ===========================================
+   以下は編集不要です
+=========================================== */
+
+let currentQ = 0;
+let score    = 0;
+let answered = false;
+const app    = document.getElementById('app');
+
+/* --- 背景ハート生成 --- */
+(function() {
+  const container = document.getElementById('bgHearts');
+  const emojis = ['❤️','💕','💗','💖','🌸'];
+  for (let i = 0; i < 18; i++) {
+    const s = document.createElement('span');
+    s.textContent             = emojis[i % emojis.length];
+    s.style.left              = Math.random() * 100 + 'vw';
+    s.style.animationDuration = (12 + Math.random() * 18) + 's';
+    s.style.animationDelay    = (Math.random() * 20) + 's';
+    s.style.fontSize          = (14 + Math.random() * 20) + 'px';
+    container.appendChild(s);
+  }
+})();
+
+/* --- 画面描画 --- */
+function render(html) {
+  app.innerHTML = `<div class="card screen">${html}</div>`;
+}
+
+/* --- タイトル画面 --- */
+function showTitle() {
+  render(`
+    <div id="screen-title">
+      <span class="title-deco">💝</span>
+      <h1 class="title-main">Happy White Day<br>有花へ</h1>
+      <div class="divider"></div>
+      <p class="title-sub">誠治から特別なホワイトデープレゼント。<br>2人の思い出クイズに挑戦しよう！</p>
+      <p class="title-sub mt-sm">全 ${quizData.length} 問　全問正解で<br>サプライズ演出が始まるよ 🎆</p>
+      <p class="title-from">— 誠治より —</p>
+      <button class="btn btn-primary" onclick="startQuiz()">❤️ クイズに挑戦する</button>
+    </div>
+  `);
+}
+
+/* --- クイズ画面 --- */
+function showQuestion() {
+  answered     = false;
+  const q      = quizData[currentQ];
+  const pct    = (currentQ / quizData.length) * 100;
+  const labels = ['A','B','C','D'];
+
+  const choicesHtml = q.choices.map((c, i) => `
+    <button class="choice-btn" id="choice-${i}" onclick="selectAnswer(${i})">
+      <span class="choice-label">${labels[i]}</span>${c}
+    </button>
+  `).join('');
+
+  render(`
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>問題 ${currentQ + 1} / ${quizData.length}</span>
+        <span>❤️ ${score} 正解</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" style="width:${pct}%"></div>
+      </div>
+    </div>
+    <div class="question-num">Question ${currentQ + 1}</div>
+    <p class="question-text">${q.question}</p>
+    <div class="choices">${choicesHtml}</div>
+    <div class="feedback" id="feedback"></div>
+    <div class="next-btn-wrap" id="nextWrap" style="display:none;">
+      <button class="btn btn-primary" onclick="nextQuestion()">
+        ${currentQ < quizData.length - 1 ? '次の問題へ →' : '結果を見る 🎉'}
+      </button>
+    </div>
+  `);
+}
+
+/* ---------- 回答処理 ---------- */
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+
+  const q        = quizData[currentQ];
+//   const isCorrect = idx === q.answer;
+  const isCorrect = Array.isArray(q.answer)
+  ? q.answer.includes(idx)
+  : idx === q.answer;
+  const feedback  = document.getElementById('feedback');
+  const buttons   = document.querySelectorAll('.choice-btn');
+
+
+  buttons.forEach(b => b.disabled = true);
+
+  if (isCorrect) {
+    score++;
+    buttons[idx].classList.add('correct');
+    feedback.textContent = `✅ 正解！ ${q.comment || ''}`;
+    feedback.className   = 'feedback correct show';
+    spawnHearts(buttons[idx]);
+  } else {
+    buttons[idx].classList.add('wrong');
+    const correctIdx = Array.isArray(q.answer) ? q.answer[0] : q.answer;
+    buttons[correctIdx].classList.add('correct');
+    feedback.textContent = `❌ 残念... 正解は「${q.choices[correctIdx]}」でした。`;
+    feedback.className   = 'feedback wrong show';
+  }
+
+  document.getElementById('nextWrap').style.display = 'block';
+}
+
+/* --- 次の問題 --- */
+function nextQuestion() {
+  currentQ++;
+  currentQ < quizData.length ? showQuestion() : showResult();
+}
+
+/* --- 結果画面 --- */
+function showResult() {
+  const perfect = score === quizData.length;
+  const emoji   = perfect ? '🎉🎊✨' : score >= 3 ? '💕' : '😊';
+  render(`
+    <div class="score-wrap screen">
+      <div style="font-size:2rem;margin-bottom:16px;">${emoji}</div>
+      <div class="score-big">${score} <span style="font-size:1.5rem">/ ${quizData.length}</span></div>
+      <div class="score-label">問正解！</div>
+      <div class="divider"></div>
+      ${perfect
+        ? `<p class="title-sub">全問正解！さすが有花💕<br>特別な演出が始まるよ🎆</p>`
+        : `<p class="title-sub">惜しかった！<br>2人の思い出を振り返ってみてね😊</p>`}
+      <div class="mt-md text-center">
+        ${perfect
+          ? `<button class="btn btn-primary" onclick="startClearSequence()">🎆 サプライズを見る</button>`
+          : `<button class="btn btn-primary" onclick="restartQuiz()">🔄 もう一度挑戦する</button>`}
+      </div>
+    </div>
+  `);
+}
+
+function restartQuiz() { currentQ = 0; score = 0; showQuestion(); }
+function startQuiz()   { currentQ = 0; score = 0; initBGM(); showQuestion(); }
+
+/* --- ハートエフェクト（正解時） --- */
+function spawnHearts(targetEl) {
+  const rect   = targetEl.getBoundingClientRect();
+  const cx     = rect.left + rect.width / 2;
+  const cy     = rect.top  + rect.height / 2;
+  const emojis = ['🌹','🌈','⭐️','⛰️','🌸'];
+  for (let i = 0; i < 10; i++) {
+    const el    = document.createElement('div');
+    el.className   = 'heart-burst';
+    el.textContent = emojis[i % emojis.length];
+    const angle = Math.random() * Math.PI * 2;
+    const dist  = 80 + Math.random() * 100;
+    el.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+    el.style.setProperty('--ty', Math.sin(angle) * dist - 60 + 'px');
+    el.style.left           = cx + 'px';
+    el.style.top            = cy + 'px';
+    el.style.animationDelay = (i * 0.04) + 's';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1400);
+  }
+}
+
+/* --- クリア演出シーケンス --- */
+function startClearSequence() {
+  // BGMはスライドショー中も継続再生（最終メッセージ時にフェードアウト）
+  document.getElementById('overlay').classList.add('active');
+  runCountdown(3, () => {
+    startFireworks();
+    setTimeout(() => {
+      const title = document.getElementById('clearTitle');
+      title.classList.add('show');
+      startFloatingHearts();
+      setTimeout(() => {
+        title.classList.remove('show');
+        showSlideshow();
+      }, 3500);
+    }, 800);
+  });
+}
+
+/* --- カウントダウン --- */
+function runCountdown(n, callback) {
+  const el = document.getElementById('countdown');
+  function tick(count) {
+    if (count <= 0) { el.classList.remove('show'); setTimeout(callback, 400); return; }
+    el.textContent = count;
+    el.classList.remove('hide');
+    el.classList.add('show');
+    setTimeout(() => {
+      el.classList.remove('show');
+      el.classList.add('hide');
+      setTimeout(() => tick(count - 1), 350);
+    }, 750);
+  }
+  tick(n);
+}
+
+/* --- 浮かぶハート --- */
+function startFloatingHearts() {
+  const overlay = document.getElementById('overlay');
+  const emojis  = ['❤️','💕','💗','💖','💝'];
+  for (let i = 0; i < 20; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className              = 'float-heart';
+      el.textContent            = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left             = Math.random() * 100 + 'vw';
+      el.style.bottom           = '-40px';
+      el.style.fontSize         = (1 + Math.random() * 1.5) + 'rem';
+      el.style.animationDuration = (4 + Math.random() * 5) + 's';
+      overlay.appendChild(el);
+      setTimeout(() => el.remove(), 9000);
+    }, i * 200);
+  }
+}
+
+/* --- スライドショー ---
+   1枚目：カーテンめくれで登場
+   2枚目以降：スムーズなクロスフェード
+*/
+function showSlideshow() {
+  const slideshow = document.getElementById('slideshow');
+  slideshow.style.display = 'flex';
+  setTimeout(() => slideshow.classList.add('show'), 50);
+
+  if (photos.length === 0) {
+    const ph = document.getElementById('slidePlaceholder');
+    ph.style.display = 'flex';
+    setTimeout(() => ph.classList.add('show'), 300);
+    setTimeout(showFinalMessage, 4000);
+    return;
+  }
+
+  const imgBack   = document.getElementById('slideImgBack');
+  const imgFront  = document.getElementById('slideImgFront');
+  const captionEl = document.getElementById('slideCaption');
+  const curtainL  = document.querySelector('.curtain-half.left');
+  const curtainR  = document.querySelector('.curtain-half.right');
+
+  const SLIDE_MS  = 3000; // ★ 1枚あたりの表示時間(ms)
+  const FADE_MS   = 800;  // クロスフェード時間(ms)
+
+  // 画像プリロード
+  const imgCache = {};
+  function preload(i) {
+    if (i >= 0 && i < photos.length && !imgCache[i]) {
+      const tmp = new Image(); tmp.src = photos[i]; imgCache[i] = tmp;
+    }
+  }
+
+  // カーテン開閉（1枚目の登場のみ）
+  function openCurtain() {
+    curtainL.classList.add('open');
+    curtainR.classList.add('open');
+  }
+
+  // クロスフェードで次の写真へ（2枚目以降）
+  function crossfadeTo(i) {
+    if (i >= photos.length) {
+      // 全枚数終了 → メッセージへ
+      imgFront.style.transition = `opacity ${FADE_MS}ms ease`;
+      imgFront.style.opacity = '0';
+      setTimeout(showFinalMessage, FADE_MS + 200);
+      return;
+    }
+    preload(i + 1);
+
+    // Backに次の画像をセット（Frontの裏で準備）
+    imgBack.src = photos[i];
+
+    // Frontをフェードアウト → Backが見える → FrontをBackと同じにしてフェードイン
+    imgFront.style.transition = `opacity ${FADE_MS}ms ease`;
+    imgFront.style.opacity = '0';
+
+    setTimeout(() => {
+      imgFront.src = photos[i];
+      imgBack.src  = photos[i];
+      imgFront.style.transition = 'none';
+      imgFront.style.opacity = '0';
+      // 強制リフロー
+      void imgFront.offsetWidth;
+      imgFront.style.transition = `opacity ${FADE_MS}ms ease`;
+      imgFront.style.opacity = '1';
+      captionEl.textContent = captions[i] || '';
+    }, FADE_MS);
+
+    // 次のスライドをスケジュール
+    setTimeout(() => crossfadeTo(i + 1), SLIDE_MS + FADE_MS);
+  }
+
+  // 最初の1枚はカーテン演出で登場
+  preload(0); preload(1);
+  imgFront.src = photos[0];
+  imgBack.src  = photos[0];
+  imgFront.style.opacity = '1';
+  captionEl.textContent  = captions[0] || '';
+
+  setTimeout(() => {
+    openCurtain();
+    // カーテンが開いたら2枚目以降をクロスフェードで流す
+    setTimeout(() => crossfadeTo(1), SLIDE_MS);
+  }, 600);
+}
+
+/* --- 最終メッセージ --- */
+function showFinalMessage() {
+  stopFireworks();
+  fadeBGM(2000); // 最終メッセージ表示時にBGMをフェードアウト
+  const msg = document.getElementById('finalMessage');
+  msg.style.display = 'flex';
+  setTimeout(() => msg.classList.add('show'), 100);
+}
+
+/* --- 花火エフェクト --- */
+const canvas  = document.getElementById('fireworkCanvas');
+const ctx     = canvas.getContext('2d');
+let particles = [];
+let animId    = null;
+let fwRunning = false;
+
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+class Particle {
+  constructor(x, y, color) {
+    this.x = x; this.y = y;
+    this.vx = (Math.random() - 0.5) * 10;
+    this.vy = (Math.random() - 0.5) * 10 - 3;
+    this.alpha = 1; this.color = color;
+    this.radius = 2 + Math.random() * 3;
+    this.gravity = 0.12;
+    this.decay = 0.015 + Math.random() * 0.012;
+  }
+  update() {
+    this.vy += this.gravity; this.x += this.vx; this.y += this.vy;
+    this.alpha = Math.max(0, this.alpha - this.decay); this.vx *= 0.98;
+  }
+  draw() {
+    ctx.save(); ctx.globalAlpha = this.alpha; ctx.fillStyle = this.color;
+    ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  }
+}
+
+function launchFirework() {
+  const x = 0.2 * canvas.width + Math.random() * 0.6 * canvas.width;
+  const y = 0.1 * canvas.height + Math.random() * 0.5 * canvas.height;
+  const hue = Math.random() * 360;
+  const colors = [`hsl(${hue},100%,70%)`,`hsl(${(hue+40)%360},100%,75%)`,`hsl(${(hue+80)%360},100%,80%)`,'#fff'];
+  const count = 80 + Math.floor(Math.random() * 60);
+  for (let i = 0; i < count; i++) particles.push(new Particle(x, y, colors[i % colors.length]));
+}
+
+function fwLoop() {
+  if (!fwRunning) return;
+  ctx.fillStyle = 'rgba(13,0,16,0.18)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  particles = particles.filter(p => p.alpha > 0.02);
+  particles.forEach(p => { p.update(); p.draw(); });
+  animId = requestAnimationFrame(fwLoop);
+}
+
+function startFireworks() {
+  fwRunning = true; particles = []; fwLoop();
+  function shoot() {
+    if (!fwRunning) return;
+    launchFirework();
+    if (Math.random() < 0.4) setTimeout(launchFirework, 150);
+    setTimeout(shoot, 600 + Math.random() * 800);
+  }
+  shoot();
+}
+
+function stopFireworks() { fwRunning = false; if (animId) cancelAnimationFrame(animId); }
+
+/* =============================================
+   🎵 BGM制御
+   ★ 音量は bgmVolume を 0.0〜1.0 で変更できます
+============================================= */
+const bgmVolume = 0.65;
+let bgmAudio   = null;
+let bgmMuted   = false;
+let bgmStarted = false;
+
+function initBGM() {
+  const sel = document.getElementById('bgmSelect');
+  const url = sel ? sel.value : '';
+  if (!url) return;
+  if (bgmAudio) { bgmAudio.pause(); bgmAudio.src = ''; }
+  bgmAudio = new Audio(url);
+  bgmAudio.loop   = true;
+  bgmAudio.volume = bgmMuted ? 0 : bgmVolume;
+  bgmAudio.play().catch(() => {
+    if (!bgmStarted) {
+      document.addEventListener('click', () => { if (bgmAudio && bgmAudio.paused) bgmAudio.play(); }, { once: true });
+    }
+  });
+  bgmStarted = true;
+}
+
+function toggleBGM() {
+  bgmMuted = !bgmMuted;
+  const btn = document.getElementById('bgmToggle');
+  if (bgmMuted) {
+    if (bgmAudio) bgmAudio.volume = 0;
+    btn.textContent = '🔇'; btn.classList.add('muted');
+  } else {
+    if (bgmAudio) bgmAudio.volume = bgmVolume;
+    btn.textContent = '🎵'; btn.classList.remove('muted');
+  }
+}
+
+function changeBGM(url) {
+  if (!url || !bgmStarted) return;
+  const wasPlaying = bgmAudio && !bgmAudio.paused;
+  if (bgmAudio) { bgmAudio.pause(); bgmAudio.src = ''; }
+  bgmAudio = new Audio(url);
+  bgmAudio.loop   = true;
+  bgmAudio.volume = bgmMuted ? 0 : bgmVolume;
+  if (wasPlaying) bgmAudio.play().catch(() => {});
+}
+
+function fadeBGM(duration = 3000) {
+  if (!bgmAudio || bgmAudio.paused) return;
+  const startVol = bgmAudio.volume;
+  const step     = startVol / (duration / 50);
+  const timer    = setInterval(() => {
+    if (bgmAudio && bgmAudio.volume > step) {
+      bgmAudio.volume = Math.max(0, bgmAudio.volume - step);
+    } else {
+      if (bgmAudio) { bgmAudio.volume = 0; bgmAudio.pause(); }
+      clearInterval(timer);
+    }
+  }, 50);
+}
+
+/* --- 初期表示 --- */
+showTitle();
+</script>
+</body>
+</html>
